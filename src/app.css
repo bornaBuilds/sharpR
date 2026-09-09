@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("./assets/fonts/manrope-variable.woff2") format("woff2-variations");
+}
+
+@theme {
+  --font-sans:
+    "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Brand palette (ported from pixel-flow) */
+  --color-bid-purple: #1d1c2c;
+  --color-bid-purple-deep: #15141f;
+  --color-bid-gold: #ffa173;
+  --color-bid-gold-deep: #b27050;
+  --color-bid-creme: #f4eada;
+  --color-white-text: #fefefe;
+
+  --color-status-error: #ff7373;
+  --color-status-error-deep: #a44848;
+  --color-status-pending: #fff373;
+  --color-status-success: #73ff8a;
+  --color-status-success-deep: #4eca62;
+
+  --radius-panel: 32px;
+  --radius-pill: 200px;
+
+  --shadow-glow:
+    0 0 12px 0 rgb(255 228 215 / 0.4), 0 0 32px 0 rgb(255 192 161 / 0.5),
+    0 0 80px 0 rgb(255 161 115 / 0.4), 0 8px 8px 0 rgb(31 31 31 / 0.05),
+    0 24px 32px 0 rgb(31 31 31 / 0.15);
+  --shadow-glow-error:
+    0 0 12px 0 rgb(255 214 214 / 0.4), 0 0 32px 0 rgb(255 161 161 / 0.5),
+    0 0 80px 0 rgb(255 115 115 / 0.4), 0 8px 8px 0 rgb(31 31 31 / 0.05),
+    0 24px 32px 0 rgb(31 31 31 / 0.15);
+  --shadow-glow-pending:
+    0 0 12px 0 rgb(255 252 215 / 0.4), 0 0 32px 0 rgb(255 248 178 / 0.5),
+    0 0 80px 0 rgb(255 243 115 / 0.4), 0 8px 8px 0 rgb(31 31 31 / 0.05),
+    0 24px 32px 0 rgb(31 31 31 / 0.15);
+  --shadow-glow-success:
+    0 0 12px 0 rgb(205 255 213 / 0.4), 0 0 32px 0 rgb(186 255 197 / 0.5),
+    0 0 80px 0 rgb(144 255 162 / 0.4), 0 8px 8px 0 rgb(31 31 31 / 0.05),
+    0 24px 32px 0 rgb(31 31 31 / 0.15);
+}
+
+@layer base {
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  body {
+    @apply overflow-hidden bg-bid-purple font-sans text-white-text antialiased select-none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-bid-gold);
+    outline-offset: 2px;
+  }
+
+  input[type="range"] {
+    accent-color: var(--color-bid-gold);
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+  }
+}
+
+@layer components {
+  /* Glass panel: pixel-flow's images-form-background, border drawn by GlassPanel.svelte */
+  .glass-panel {
+    --panel-stroke: var(--color-bid-gold);
+    position: relative;
+    background:
+      linear-gradient(
+        152deg,
+        rgb(254 254 254 / 0.03) -5.4%,
+        rgb(241 241 241 / 0) 113.92%
+      ),
+      linear-gradient(
+        312deg,
+        rgb(29 28 44 / 0.8) 20.58%,
+        rgb(29 28 44 / 0.4) 159.82%
+      );
+    border-radius: var(--radius-panel);
+    backdrop-filter: blur(24px);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .glass-panel[data-status="pending"] {
+    --panel-stroke: var(--color-status-pending);
+  }
+
+  .glass-panel[data-status="success"] {
+    --panel-stroke: var(--color-status-success);
+  }
+
+  .glass-panel[data-status="error"] {
+    --panel-stroke: var(--color-status-error);
+  }
+
+  .glass-panel > .panel-border {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .glass-panel > .panel-border rect {
+    fill: none;
+    stroke: var(--panel-stroke);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke 0.3s ease;
+  }
+
+  .glass-panel[data-dashed="true"] > .panel-border rect {
+    stroke-dasharray: 32 32;
+    stroke-dashoffset: 22;
+  }
+
+  .glass-panel[data-dashed="false"] > .panel-border rect {
+    stroke: rgb(254 254 254 / 0.12);
+    stroke-width: 1;
+  }
+
+  /* Gold gradient pill button (primary CTA) */
+  .btn-pill {
+    background-image: linear-gradient(
+      to right,
+      var(--color-bid-gold-deep),
+      var(--color-bid-gold),
+      var(--color-bid-gold-deep)
+    );
+    background-position: 0% 0%;
+    background-size: 200% 100%;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-pill px-6 py-3 font-semibold text-bid-purple transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-pill:not(:disabled):hover {
+    background-position: 100% 0%;
+    filter: brightness(1.06);
+  }
+
+  .btn-pill[data-variant="error"] {
+    background-image: linear-gradient(
+      to right,
+      var(--color-status-error-deep),
+      var(--color-status-error),
+      var(--color-status-error-deep)
+    );
+  }
+
+  .btn-pill[data-variant="success"] {
+    background-image: linear-gradient(
+      to right,
+      var(--color-status-success-deep),
+      var(--color-status-success),
+      var(--color-status-success-deep)
+    );
+  }
+
+  /* Outlined pill button (secondary) */
+  .btn-outline-pill {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-pill border border-white-text/40 bg-transparent px-5 py-2.5 font-medium text-white-text transition-colors duration-200 hover:border-white-text/80 hover:bg-white-text/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white-text/40 disabled:hover:bg-transparent;
+  }
+
+  /* Round icon button (toolbars, row actions) */
+  .btn-icon {
+    @apply inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-white-text/75 transition-colors duration-200 hover:bg-white-text/10 hover:text-white-text disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent;
+  }
+
+  .btn-icon[data-active="true"] {
+    @apply bg-bid-gold/20 text-bid-gold;
+  }
+
+  .btn-icon[data-danger="true"]:hover {
+    @apply bg-status-error/15 text-status-error;
+  }
+
+  /* Small selectable pill (aspect ratios, tabs) */
+  .chip {
+    @apply inline-flex cursor-pointer items-center justify-center rounded-pill border border-white-text/20 px-3 py-1.5 text-sm font-medium text-white-text/80 transition-colors duration-200 hover:border-white-text/50 hover:text-white-text;
+  }
+
+  .chip[data-active="true"] {
+    @apply border-bid-gold bg-bid-gold text-bid-purple;
+  }
+
+  .field {
+    @apply rounded-xl border border-white-text/15 bg-bid-purple-deep/60 px-3 py-2 text-sm text-white-text placeholder:text-white-text/40 focus:border-bid-gold focus:outline-none;
+  }
+
+  /* Gradient scrollbar (pixel-flow) */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: linear-gradient(#15141f, #1d1c2c);
+    border-radius: 200px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(#b27050, #ffa173, #b27050);
+    border-radius: 200px;
+  }
+
+  /* Transparency checkerboard for the crop stage */
+  .checker {
+    background-color: #15141f;
+    background-image:
+      linear-gradient(45deg, #1f1e2e 25%, transparent 25%),
+      linear-gradient(-45deg, #1f1e2e 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #1f1e2e 75%),
+      linear-gradient(-45deg, transparent 75%, #1f1e2e 75%);
+    background-position:
+      0 0,
+      0 8px,
+      8px -8px,
+      -8px 0;
+    background-size: 16px 16px;
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!node_modules",
+      "!dist",
+      "!src-tauri/target",
+      "!src-tauri/gen",
+      "!src-tauri/icons",
+      "!src/assets",
+      "!.vscode"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        "preset": "recommended"
+      },
+      "correctness": {
+        "preset": "recommended",
+        "useUniqueElementIds": "error",
+        "noUnusedVariables": "error",
+        "noUnusedFunctionParameters": "error",
+        "noUnusedImports": {
+          "level": "error",
+          "options": {},
+          "fix": "safe"
+        }
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "error",
+          "fix": "safe",
+          "options": {
+            "attributes": ["classList"],
+            "functions": ["clsx", "cva", "tw", "tw.*"]
+          }
+        }
+      },
+      "performance": {
+        "preset": "recommended",
+        "noAwaitInLoops": "error",
+        "noBarrelFile": "error",
+        "useTopLevelRegex": "error"
+      },
+      "security": {
+        "preset": "recommended"
+      },
+      "style": {
+        "preset": "recommended",
+        "noDoneCallback": "error",
+        "noNegationElse": "error",
+        "noParameterProperties": "error",
+        "noMagicNumbers": "error",
+        "noParameterAssign": "error",
+        "useExportsLast": "error",
+        "useForOf": "error",
+        "useNumericSeparators": "error",
+        "noYodaExpression": "error",
+        "useBlockStatements": "error",
+        "useCollapsedElseIf": "error",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        },
+        "useConsistentBuiltinInstantiation": "error",
+        "useDefaultSwitchClause": "error",
+        "useExplicitLengthCheck": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["kebab-case"]
+          }
+        },
+        "useShorthandAssign": "error",
+        "useThrowNewError": "error",
+        "useArrayLiterals": "error",
+        "noDescendingSpecificity": "error",
+        "noEnum": "error",
+        "noNestedTernary": "error",
+        "noSubstr": "error",
+        "useAtIndex": "error",
+        "useCollapsedIf": "error",
+        "useConsistentCurlyBraces": "error"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": {
+            "maxAllowedComplexity": 15
+          }
+        },
+        "useDateNow": "error",
+        "noExcessiveLinesPerFunction": {
+          "level": "error",
+          "options": {
+            "skipBlankLines": true,
+            "maxLines": 50
+          }
+        },
+        "noForEach": "error",
+        "noImplicitCoercions": "error",
+        "noUselessStringConcat": "error",
+        "useSimplifiedLogicExpression": "error",
+        "useWhile": "error"
+      },
+      "suspicious": {
+        "preset": "recommended",
+        "noUnknownAtRules": "off",
+        "noConsole": "error",
+        "noUnassignedVariables": "error",
+        "noEmptyBlockStatements": "error",
+        "noEvolvingTypes": "error",
+        "noMisplacedAssertion": "error",
+        "noSkippedTests": "error",
+        "noVar": "error",
+        "useAwait": "error",
+        "useErrorMessage": "error",
+        "useNumberToFixedDigitsArgument": "error",
+        "noDuplicateElseIf": "error",
+        "noDuplicateProperties": "error",
+        "noIrregularWhitespace": "error",
+        "noOctalEscape": "error",
+        "noTemplateCurlyInString": "error",
+        "useGoogleFontDisplay": "error",
+        "useGuardForIn": "error",
+        "noNonNullAssertedOptionalChain": "error",
+        "noShadow": "error"
+      }
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              {
+                "type": false
+              }
+            ]
+          }
+        },
+        "useSortedAttributes": "on",
+        "useSortedProperties": "on"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/lib/crop/**", "**/*.test.ts", "vite.config.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noMagicNumbers": "off"
+          },
+          "complexity": {
+            "noExcessiveLinesPerFunction": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.svelte"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "off",
+            "noUnusedVariables": "off"
+          },
+          "style": {
+            "noMagicNumbers": "off",
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "filenameCases": ["kebab-case", "camelCase", "PascalCase"]
+              }
+            }
+          },
+          "complexity": {
+            "noExcessiveLinesPerFunction": {
+              "level": "error",
+              "options": {
+                "skipBlankLines": true,
+                "maxLines": 100
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "javascript": {
+    "formatter": {
+      "semicolons": "always"
+    },
+    "globals": []
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    },
+    "formatter": {
+      "enabled": true
+    }
+  }
+}

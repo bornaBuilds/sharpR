@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <title>sharpR</title>
+  <rect width="1024" height="1024" rx="224" fill="#1D1C2C"/>
+  <g fill="none" stroke="#FFA173" stroke-width="56" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M190 320V190h130"/>
+    <path d="M704 190h130v130"/>
+    <path d="M834 704v130H704"/>
+    <path d="M320 834H190V704"/>
+  </g>
+  <g fill="none" stroke="#FEFEFE" stroke-width="92" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M412 660V364h130a83 83 0 0 1 0 166H412"/>
+    <path d="M530 530l98 130"/>
+  </g>
+</svg>
