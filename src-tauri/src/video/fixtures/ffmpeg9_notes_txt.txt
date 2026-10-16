@@ -1,0 +1,3 @@
+[in#0 @ 0x64da457bcb80] Error opening input: Invalid data found when processing input
+Error opening input file notes.txt.
+Error opening input files: Invalid data found when processing input

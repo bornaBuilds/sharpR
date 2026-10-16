@@ -1,4 +1,12 @@
-import type { ConvertOptions, OutputFormat } from "$lib/tauri/types";
+import { type MaxResolution, resolutionToCap } from "$lib/video/helpers";
+import type {
+  ConvertOptions,
+  EncodeOptions,
+  OutputFormat,
+  VideoFormat,
+  VideoOptions,
+  VideoQuality,
+} from "$lib/tauri/types";
 
 const STORAGE_KEY = "sharpr.settings.v1";
 const DEFAULT_MAX_DIMENSION = 1920;
@@ -23,10 +31,24 @@ interface ConvertSettings extends FormatSettings {
   recursive: boolean;
 }
 
+interface VideoSettings {
+  format: VideoFormat;
+  quality: VideoQuality;
+  maxResolution: MaxResolution;
+  removeAudio: boolean;
+  recursive: boolean;
+}
+
 interface Settings {
   convert: ConvertSettings;
   crop: FormatSettings;
+  video: VideoSettings;
+  /** Image format for poster frames saved from the video tab. */
+  poster: FormatSettings;
 }
+
+/** Settings blocks that `FormatControls` can edit. */
+type FormatTarget = "convert" | "crop" | "poster";
 
 function defaultFormatSettings(): FormatSettings {
   return { format: "webp", quality: { ...DEFAULT_QUALITY }, lossless: false };
@@ -41,21 +63,31 @@ function defaults(): Settings {
       recursive: true,
     },
     crop: defaultFormatSettings(),
+    video: {
+      format: "mp4",
+      quality: "balanced",
+      maxResolution: "original",
+      removeAudio: false,
+      recursive: true,
+    },
+    poster: defaultFormatSettings(),
+  };
+}
+
+function mergeFormat<T extends FormatSettings>(base: T, saved?: Partial<T>): T {
+  return {
+    ...base,
+    ...saved,
+    quality: { ...base.quality, ...saved?.quality },
   };
 }
 
 function merge(base: Settings, saved: Partial<Settings>): Settings {
   return {
-    convert: {
-      ...base.convert,
-      ...saved.convert,
-      quality: { ...base.convert.quality, ...saved.convert?.quality },
-    },
-    crop: {
-      ...base.crop,
-      ...saved.crop,
-      quality: { ...base.crop.quality, ...saved.crop?.quality },
-    },
+    convert: mergeFormat(base.convert, saved.convert),
+    crop: mergeFormat(base.crop, saved.crop),
+    video: { ...base.video, ...saved.video },
+    poster: mergeFormat(base.poster, saved.poster),
   };
 }
 
@@ -112,7 +144,22 @@ class SettingsStore {
     return toOptions(this.value.crop, null);
   }
 
-  resetQuality(target: "convert" | "crop"): void {
+  get videoOptions(): VideoOptions {
+    const v = this.value.video;
+    return {
+      format: v.format,
+      quality: v.quality,
+      maxResolution: resolutionToCap(v.maxResolution),
+      removeAudio: v.removeAudio,
+    };
+  }
+
+  get posterOptions(): EncodeOptions {
+    const { format, quality, lossless } = toOptions(this.value.poster, null);
+    return { format, quality, lossless };
+  }
+
+  resetQuality(target: FormatTarget): void {
     const fs = this.value[target];
     fs.quality[fs.format] = DEFAULT_QUALITY[fs.format];
   }
@@ -121,4 +168,10 @@ class SettingsStore {
 const settings = new SettingsStore();
 
 export { DEFAULT_QUALITY, settings };
-export type { ConvertSettings, FormatSettings, Settings };
+export type {
+  ConvertSettings,
+  FormatSettings,
+  FormatTarget,
+  Settings,
+  VideoSettings,
+};

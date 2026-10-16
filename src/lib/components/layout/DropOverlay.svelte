@@ -1,12 +1,14 @@
 <script lang="ts">
 import Icon from "$lib/icons/Icon.svelte";
-import { ui } from "$lib/stores/ui.svelte";
+import { type Tab, ui } from "$lib/stores/ui.svelte";
 
-const message = $derived(
-  ui.activeTab === "convert"
-    ? "Drop images or folders to add them"
-    : "Drop an image to crop it",
-);
+const MESSAGES: Record<Tab, string> = {
+  convert: "Drop images or folders to add them",
+  crop: "Drop an image to crop it",
+  video: "Drop videos or folders to add them",
+};
+
+const message = $derived(MESSAGES[ui.activeTab]);
 </script>
 
 {#if ui.dragHover}

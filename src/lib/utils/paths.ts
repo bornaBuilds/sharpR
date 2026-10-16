@@ -9,6 +9,24 @@ const SUPPORTED_EXTENSIONS = [
   "tiff",
 ] as const;
 
+/** Keep in sync with VIDEO_EXTENSIONS in src-tauri/src/video/formats.rs. */
+const VIDEO_EXTENSIONS = [
+  "mp4",
+  "m4v",
+  "mov",
+  "mkv",
+  "webm",
+  "avi",
+  "wmv",
+  "flv",
+  "mpg",
+  "mpeg",
+  "3gp",
+  "ogv",
+  "mts",
+  "m2ts",
+] as const;
+
 function basename(path: string): string {
   const cut = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
   return path.slice(cut + 1);
@@ -29,12 +47,21 @@ function isSupportedPath(path: string): boolean {
   return (SUPPORTED_EXTENSIONS as readonly string[]).includes(ext);
 }
 
+function isVideoPath(path: string): boolean {
+  const ext = extOf(basename(path));
+  return (VIDEO_EXTENSIONS as readonly string[]).includes(ext);
+}
+
 function outputName(name: string, ext: string): string {
   return `${stem(name)}.${ext}`;
 }
 
 function cropName(name: string, ext: string): string {
   return `${stem(name)}-crop.${ext}`;
+}
+
+function posterName(name: string, ext: string): string {
+  return `${stem(name)}-poster.${ext}`;
 }
 
 function errorMessage(error: unknown): string {
@@ -47,7 +74,10 @@ export {
   errorMessage,
   extOf,
   isSupportedPath,
+  isVideoPath,
   outputName,
+  posterName,
   SUPPORTED_EXTENSIONS,
   stem,
+  VIDEO_EXTENSIONS,
 };

@@ -29,4 +29,23 @@ function formatPercent(value: number): string {
   return `${value > 0 ? "+" : ""}${value}%`;
 }
 
-export { formatBytes, formatPercent, percentChange };
+const SECONDS_PER_MINUTE = 60;
+const SECONDS_PER_HOUR = 3600;
+
+function pad2(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+/** "0:07", "12:34" or "1:02:03"; an em dash when the duration is unknown. */
+function formatDuration(seconds: number | null): string {
+  if (seconds === null || !Number.isFinite(seconds) || seconds < 0) {
+    return "—";
+  }
+  const total = Math.round(seconds);
+  const hours = Math.floor(total / SECONDS_PER_HOUR);
+  const minutes = Math.floor((total % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
+  const secs = pad2(total % SECONDS_PER_MINUTE);
+  return hours > 0 ? `${hours}:${pad2(minutes)}:${secs}` : `${minutes}:${secs}`;
+}
+
+export { formatBytes, formatDuration, formatPercent, percentChange };

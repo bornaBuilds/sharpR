@@ -4,6 +4,7 @@ import { type Tab, ui } from "$lib/stores/ui.svelte";
 const TABS: { id: Tab; label: string }[] = [
   { id: "convert", label: "Convert" },
   { id: "crop", label: "Crop & resize" },
+  { id: "video", label: "Compress videos" },
 ];
 </script>
 

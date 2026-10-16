@@ -2,10 +2,13 @@
 
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::process::Child;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 
 use image::RgbaImage;
+
+use crate::video::probe::ProbeInfo;
 
 /// Where an item's original bytes come from.
 #[derive(Clone)]
@@ -63,6 +66,94 @@ impl AppState {
     pub fn next_id(&self, prefix: &str) -> String {
         let n = self.next_id.fetch_add(1, Ordering::Relaxed) + 1;
         format!("{prefix}-{n}")
+    }
+}
+
+/// A source video registered in the video list.
+#[derive(Clone)]
+pub struct VideoEntry {
+    pub id: String,
+    pub name: String,
+    pub path: PathBuf,
+    /// Canonical path used to detect duplicates.
+    pub key: PathBuf,
+    pub size_bytes: u64,
+    pub probe: ProbeInfo,
+}
+
+/// A poster candidate extracted next to the compressed video.
+#[derive(Clone)]
+pub struct PosterFrame {
+    pub path: PathBuf,
+    pub time_sec: f64,
+    pub dark: bool,
+    pub width: u32,
+    pub height: u32,
+}
+
+/// A compressed video waiting in the scratch folder to be saved.
+pub struct VideoResult {
+    pub path: PathBuf,
+    pub ext: &'static str,
+    pub size_bytes: u64,
+    pub width: u32,
+    pub height: u32,
+    /// The re-encode saved too little, so the source was stream-copied.
+    pub kept_original: bool,
+    pub posters: Vec<PosterFrame>,
+}
+
+/// State of the video tab. Separate from [`AppState`] so image conversions
+/// and video compressions never block each other.
+#[derive(Default)]
+pub struct VideoState {
+    pub items: Mutex<HashMap<String, VideoEntry>>,
+    pub results: Mutex<HashMap<String, VideoResult>>,
+    pub running: AtomicBool,
+    pub cancel: AtomicBool,
+    /// The FFmpeg process currently encoding, so it can be killed.
+    pub child: Mutex<Option<Child>>,
+    work_root: OnceLock<PathBuf>,
+    next_id: AtomicU64,
+}
+
+impl VideoState {
+    pub fn next_id(&self) -> String {
+        let n = self.next_id.fetch_add(1, Ordering::Relaxed) + 1;
+        format!("vid-{n}")
+    }
+
+    pub fn set_work_root(&self, dir: PathBuf) {
+        let _ = self.work_root.set(dir);
+    }
+
+    /// This session's scratch folder (see `video::workdir`).
+    pub fn work_root(&self) -> PathBuf {
+        self.work_root.get().cloned().unwrap_or_else(|| {
+            std::env::temp_dir().join(format!("sharpr-video-{}", std::process::id()))
+        })
+    }
+
+    pub fn item_dir(&self, id: &str) -> PathBuf {
+        self.work_root().join(id)
+    }
+
+    /// Kill the running FFmpeg process, if any (it is reaped by its job).
+    pub fn kill_child(&self) {
+        if let Some(child) = lock(&self.child).as_mut() {
+            let _ = child.kill();
+        }
+    }
+
+    /// App exit: stop the encode and delete this session's scratch files.
+    /// The child is reaped here because Windows won't delete open files.
+    pub fn shutdown(&self) {
+        self.cancel.store(true, Ordering::SeqCst);
+        if let Some(mut child) = lock(&self.child).take() {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
+        let _ = std::fs::remove_dir_all(self.work_root());
     }
 }
 

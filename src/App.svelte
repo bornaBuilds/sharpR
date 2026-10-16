@@ -4,18 +4,30 @@ import CropTab from "$lib/components/crop/CropTab.svelte";
 import AppHeader from "$lib/components/layout/AppHeader.svelte";
 import DropOverlay from "$lib/components/layout/DropOverlay.svelte";
 import Toasts from "$lib/components/layout/Toasts.svelte";
+import VideoTab from "$lib/components/video/VideoTab.svelte";
 import { converter } from "$lib/stores/converter.svelte";
 import { crop } from "$lib/stores/crop.svelte";
 import { toasts } from "$lib/stores/toasts.svelte";
 import { ui } from "$lib/stores/ui.svelte";
+import { video } from "$lib/stores/video.svelte";
 import { registerDragDrop } from "$lib/tauri/drag-drop";
 import { isSupportedPath } from "$lib/utils/paths";
 
 function handleDrop(paths: string[]): void {
-  if (ui.activeTab === "convert") {
-    void converter.addPaths(paths);
-    return;
+  switch (ui.activeTab) {
+    case "convert":
+      void converter.addPaths(paths);
+      break;
+    case "video":
+      void video.addPaths(paths);
+      break;
+    default:
+      openDroppedImage(paths);
+      break;
   }
+}
+
+function openDroppedImage(paths: string[]): void {
   const image = paths.find(isSupportedPath);
   if (!image) {
     toasts.push("Drop a single image file to crop it (folders go to Convert)");
@@ -64,6 +76,9 @@ $effect(() => {
     </div>
     <div class="h-full" hidden={ui.activeTab !== "crop"}>
       <CropTab />
+    </div>
+    <div class="h-full" hidden={ui.activeTab !== "video"}>
+      <VideoTab />
     </div>
   </main>
   <DropOverlay />

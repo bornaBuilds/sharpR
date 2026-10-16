@@ -1,0 +1,17 @@
+Input #0, matroska,webm, from 'cover_51.mkv':
+  Metadata:
+    ENCODER         : Lavf63.1.102
+  Duration: 00:00:02.10, start: 0.080000, bitrate: 2746 kb/s
+  Stream #0:0: Video: h264 (High), yuv420p(tv, progressive), 1280x720 [SAR 1:1 DAR 16:9], 25 fps, 25 tbr, 1k tbn, start 0.080000
+    Metadata:
+      ENCODER         : Lavc63.1.102 libx264
+      DURATION        : 00:00:02.080000000
+  Stream #0:1: Audio: aac (LC), 44100 Hz, 5.1, fltp, start 0.080000
+    Metadata:
+      ENCODER         : Lavc63.1.102 aac
+      DURATION        : 00:00:02.103000000
+  Stream #0:2: Video: png (MPNG / 0x474E504D), rgb24(pc, gbr/unknown/unknown, progressive), 320x240 [SAR 1:1 DAR 4:3], 25 fps, 25 tbr, 1k tbn, start 0.080000
+    Metadata:
+      ENCODER         : Lavc63.1.102 png
+      DURATION        : 00:00:00.120000000
+At least one output file must be specified

@@ -1,4 +1,4 @@
-type Tab = "convert" | "crop";
+type Tab = "convert" | "crop" | "video";
 
 class UiStore {
   activeTab = $state<Tab>("convert");

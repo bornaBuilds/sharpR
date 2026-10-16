@@ -58,6 +58,17 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
+      # tauri-build needs the sidecar before any cargo build or test. The
+      # Intel macOS job fetches both its target and the arm64 host binary.
+      - name: Cache FFmpeg sidecar
+        uses: actions/cache@v4
+        with:
+          path: src-tauri/binaries
+          key: ffmpeg-${{ runner.os }}-${{ runner.arch }}-${{ matrix.rust-targets }}-${{ hashFiles('scripts/ffmpeg-manifest.json') }}
+
+      - name: Fetch FFmpeg sidecar
+        run: node scripts/fetch-ffmpeg.mjs ${{ matrix.rust-targets }}
+
       - name: Lint, type-check and unit-test the frontend
         run: |
           pnpm lint

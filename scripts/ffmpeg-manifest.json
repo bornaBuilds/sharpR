@@ -1,0 +1,37 @@
+{
+  "$comment": "Pinned GPL FFmpeg builds bundled as the sharpr-ffmpeg sidecar. Update url, sha256 and member together; scripts/fetch-ffmpeg.mjs verifies the checksum.",
+  "targets": {
+    "x86_64-unknown-linux-gnu": {
+      "version": "n9.0.2-28-g669f5ab083",
+      "source": "https://github.com/BtbN/FFmpeg-Builds",
+      "license": "GPL-3.0-or-later",
+      "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-15-13-03/ffmpeg-n9.0.2-28-g669f5ab083-linux64-gpl-9.0.tar.xz",
+      "sha256": "715ce3c292c749c00b196fc0ff703fe3be12351aa71a626c00d19617b3b280e4",
+      "member": "ffmpeg-n9.0.2-28-g669f5ab083-linux64-gpl-9.0/bin/ffmpeg"
+    },
+    "x86_64-pc-windows-msvc": {
+      "version": "n9.0.2-28-g669f5ab083",
+      "source": "https://github.com/BtbN/FFmpeg-Builds",
+      "license": "GPL-3.0-or-later",
+      "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-15-13-03/ffmpeg-n9.0.2-28-g669f5ab083-win64-gpl-9.0.zip",
+      "sha256": "1bb62cfd4bdc12a63a6a1151458ea5ae7001fd055202afc5463517028882a631",
+      "member": "ffmpeg-n9.0.2-28-g669f5ab083-win64-gpl-9.0/bin/ffmpeg.exe"
+    },
+    "aarch64-apple-darwin": {
+      "version": "9.0.2",
+      "source": "https://ffmpeg.martin-riedl.de",
+      "license": "GPL-3.0-or-later",
+      "url": "https://ffmpeg.martin-riedl.de/download/macos/arm64/1789931890_9.0.2/ffmpeg.zip",
+      "sha256": "c8ed4c4e6978a03c485edbfe4e0a5dc2380f8a30bba5150531b31b094492d924",
+      "member": "ffmpeg"
+    },
+    "x86_64-apple-darwin": {
+      "version": "9.0.2",
+      "source": "https://ffmpeg.martin-riedl.de",
+      "license": "GPL-3.0-or-later",
+      "url": "https://ffmpeg.martin-riedl.de/download/macos/amd64/1789931006_9.0.2/ffmpeg.zip",
+      "sha256": "7c6b4125b191cbf773832dc51f424cf2b6bb7da43007d1e066f95909e47cacd4",
+      "member": "ffmpeg"
+    }
+  }
+}

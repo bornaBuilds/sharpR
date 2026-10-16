@@ -1,0 +1,111 @@
+name: Test build
+
+# Unsigned Windows and macOS bundles for trying sharpR on real devices.
+# Start it from the Actions tab ("Run workflow"; the file must be on the
+# default branch for that) or push a branch named test-build/<anything>.
+# The installers are attached to the run as artifacts; nothing is released.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "test-build/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bundle:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            bundles: nsis
+            artifact: sharpr-windows-x64
+            path: src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+          - name: macOS Apple Silicon
+            platform: macos-latest
+            target: aarch64-apple-darwin
+            bundles: dmg
+            artifact: sharpr-macos-apple-silicon
+            path: src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+          - name: macOS Intel
+            platform: macos-latest
+            target: x86_64-apple-darwin
+            bundles: dmg
+            artifact: sharpr-macos-intel
+            path: src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+          key: ${{ matrix.target }}
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache FFmpeg sidecar
+        uses: actions/cache@v4
+        with:
+          path: src-tauri/binaries
+          key: ffmpeg-${{ runner.os }}-${{ runner.arch }}-${{ matrix.target }}-${{ hashFiles('scripts/ffmpeg-manifest.json') }}
+
+      - name: Fetch FFmpeg sidecar
+        run: node scripts/fetch-ffmpeg.mjs ${{ matrix.target }}
+
+      - name: Build installer
+        shell: bash
+        run: |
+          args=(--target "${{ matrix.target }}" --bundles "${{ matrix.bundles }}")
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            # Ad-hoc signature: without any signature, Apple Silicon reports
+            # apps downloaded from the internet as "damaged".
+            args+=(--config '{"bundle":{"macOS":{"signingIdentity":"-"}}}')
+          fi
+          pnpm tauri build "${args[@]}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.path }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Installation notes
+        shell: bash
+        run: |
+          {
+            echo "### ${{ matrix.name }}"
+            echo "Download **${{ matrix.artifact }}** under *Artifacts* on this run's summary page and unzip it."
+            if [[ "$RUNNER_OS" == "macOS" ]]; then
+              echo "Open the DMG and drag sharpR to Applications. The build is not notarized: on first launch,"
+              echo "open System Settings → Privacy & Security and click **Open Anyway**,"
+              echo "or run \`xattr -dr com.apple.quarantine /Applications/sharpR.app\`."
+            else
+              echo "Run the setup .exe. It is unsigned: if SmartScreen appears, click **More info → Run anyway**."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

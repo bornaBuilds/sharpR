@@ -3,13 +3,11 @@ import NumberField from "$lib/components/ui/NumberField.svelte";
 import PillDropdown from "$lib/components/ui/PillDropdown.svelte";
 import Slider from "$lib/components/ui/Slider.svelte";
 import Toggle from "$lib/components/ui/Toggle.svelte";
-import { settings } from "$lib/stores/settings.svelte";
+import { type FormatTarget, settings } from "$lib/stores/settings.svelte";
 import type { OutputFormat } from "$lib/tauri/types";
 
-let {
-  target,
-  disabled = false,
-}: { target: "convert" | "crop"; disabled?: boolean } = $props();
+let { target, disabled = false }: { target: FormatTarget; disabled?: boolean } =
+  $props();
 
 const FORMATS: { value: OutputFormat; label: string }[] = [
   { value: "webp", label: "WebP" },

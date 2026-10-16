@@ -1,0 +1,15 @@
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'hevc_hlg_rot.mov':
+  Metadata:
+    major_brand     : qt  
+    minor_version   : 512
+    compatible_brands: qt  
+    encoder         : Lavf63.1.102
+  Duration: 00:00:02.00, start: 0.000000, bitrate: 4831 kb/s
+  Stream #0:0[0x1]: Video: hevc (Main 10) (hvc1 / 0x31637668), yuv420p10le(tv, bt2020nc/bt2020/arib-std-b67, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 4815 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      vendor_id       : FFMP
+      encoder         : Lavc63.1.102 libx265
+    Side data:
+      Display Matrix: rotation of 90.00 degrees
+At least one output file must be specified

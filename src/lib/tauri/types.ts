@@ -106,8 +106,76 @@ interface CropResult {
   previewDataUrl: string;
 }
 
+/** Image encoder settings (poster export). */
+interface EncodeOptions {
+  format: OutputFormat;
+  quality: number;
+  lossless: boolean;
+}
+
+type VideoFormat = "mp4" | "webm";
+type VideoQuality = "high" | "balanced" | "small" | "smallest";
+
+interface VideoOptions {
+  format: VideoFormat;
+  quality: VideoQuality;
+  /** Short-side cap in pixels; null keeps the original size. */
+  maxResolution: number | null;
+  removeAudio: boolean;
+}
+
+interface VideoItem {
+  id: string;
+  name: string;
+  path: string;
+  sizeBytes: number;
+  /** Display size (rotation and pixel aspect applied). */
+  width: number;
+  height: number;
+  durationSec: number | null;
+  videoCodec: string;
+  hasAudio: boolean;
+  hdr: boolean;
+  thumbDataUrl: string;
+}
+
+interface VideoResult {
+  sizeBytes: number;
+  ext: string;
+  width: number;
+  height: number;
+  /** Re-encoding saved too little, so the source was kept (stream copy). */
+  keptOriginal: boolean;
+  posterCount: number;
+}
+
+type VideoProgress =
+  | { type: "started"; id: string }
+  | { type: "progress"; id: string; fraction: number | null }
+  | { type: "finishing"; id: string }
+  | ({ type: "done"; id: string } & VideoResult)
+  | { type: "error"; id: string; message: string }
+  | { type: "cancelled"; id: string };
+
+interface CompressSummary {
+  done: number;
+  failed: number;
+  cancelled: number;
+  keptOriginal: number;
+}
+
+interface PosterPreview {
+  index: number;
+  timeSec: number;
+  dark: boolean;
+  width: number;
+  height: number;
+  previewDataUrl: string;
+}
+
 export type {
   AddSummary,
+  CompressSummary,
   ConvertedInfo,
   ConvertOptions,
   ConvertProgress,
@@ -117,8 +185,16 @@ export type {
   CropRect,
   CropResult,
   CropSource,
+  EncodeOptions,
   ImageItem,
   OutputFormat,
+  PosterPreview,
   SaveSummary,
   TransformParams,
+  VideoFormat,
+  VideoItem,
+  VideoOptions,
+  VideoProgress,
+  VideoQuality,
+  VideoResult,
 };

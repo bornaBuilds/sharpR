@@ -21,6 +21,14 @@ pub enum AppError {
     Invalid(String),
     #[error("The image processor panicked")]
     Panic,
+    #[error("FFmpeg failed: {0}")]
+    Ffmpeg(String),
+    #[error("The bundled FFmpeg ({0}) is missing; reinstall sharpR")]
+    FfmpegMissing(String),
+    #[error("A video compression is already running")]
+    VideoBusy,
+    #[error("Cancelled")]
+    Cancelled,
 }
 
 impl Serialize for AppError {

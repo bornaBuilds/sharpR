@@ -62,6 +62,11 @@ const ICON_PATHS = {
   success: ["M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z", "M8 12l3 3 5-6"],
   info: ["M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z", "M12 11v5", "M12 8h.01"],
   images: ["M8 3h13v13H8z", "M3 8v13h13", "M8 13l3-3 4 4 2-2 4 4"],
+  film: [
+    "M4 4h16v16H4z",
+    "M8 4v16M16 4v16",
+    "M4 8h4M4 12h4M4 16h4M16 8h4M16 12h4M16 16h4",
+  ],
 } as const;
 
 type IconName = keyof typeof ICON_PATHS;
