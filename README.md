@@ -67,13 +67,20 @@ Useful scripts:
 - Animated GIF/WebP inputs use their first frame.
 - ICC profiles are not colour-managed; wide-gamut sources are re-encoded as-is.
 - AVIF encoding runs without rav1e's assembly kernels by default (no NASM needed). Install NASM and build with `--features avif-asm` (`cargo build --features avif-asm` in `src-tauri`) for faster AVIF encoding.
-- Release builds are unsigned. On macOS, right-click → Open the app the first time (or run `xattr -cr sharpR.app`).
+- Release builds are not code-signed or notarized yet. On Windows, SmartScreen may warn: click **More info → Run anyway**. macOS builds are ad-hoc signed (`src-tauri/tauri.macos.conf.json`), so on first launch open **System Settings → Privacy & Security** and click **Open Anyway** (or run `xattr -dr com.apple.quarantine /Applications/sharpR.app`).
+- Linux AppImages need FUSE 2 (`libfuse2` on Ubuntu 22.04, `libfuse2t64` on 24.04+).
 
 ## Releases
 
-Pushing a `v*` tag runs the GitHub Actions workflow in `.github/workflows/release.yml`, which builds Windows (NSIS), macOS (Apple Silicon and Intel DMG) and Linux (AppImage + DEB) installers and attaches them to a draft release.
+Two GitHub Actions workflows build installers for all three systems: Windows (NSIS `.exe`), macOS (Apple Silicon and Intel `.dmg`) and Linux (`.AppImage` + `.deb`, built on Ubuntu 22.04 for broad glibc compatibility). Both fetch the pinned FFmpeg sidecar first.
 
-For testing on real devices without releasing, `.github/workflows/test-build.yml` builds unsigned Windows and macOS (Apple Silicon and Intel, ad-hoc signed) installers and attaches them to the workflow run as artifacts for 14 days. Push a branch named `test-build/<anything>`, or start it with **Actions → Test build → Run workflow** once the workflow is on the default branch.
+**Test builds** (`.github/workflows/test-build.yml`) attach the installers to the workflow run as artifacts for 14 days, without creating a release. Push a branch named `test-build/<anything>`, or use **Actions → Test build → Run workflow**.
+
+**Releases** (`.github/workflows/release.yml`) run the frontend and Rust test suites and attach the installers to a draft GitHub release. To publish a version:
+
+1. Bump the version in `package.json`, `src-tauri/tauri.conf.json` and `src-tauri/Cargo.toml` (then `cargo check` in `src-tauri` to update `Cargo.lock`), and commit.
+2. Tag and push: `git tag v0.3.0 && git push origin main v0.3.0`. The workflow fails early if the tag doesn't match the app version.
+3. When all jobs are green, open the draft release on GitHub, add the "What's new" notes and click **Publish release**.
 
 ## License
 

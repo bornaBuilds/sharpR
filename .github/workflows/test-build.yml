@@ -1,8 +1,8 @@
 name: Test build
 
-# Unsigned Windows and macOS bundles for trying sharpR on real devices.
-# Start it from the Actions tab ("Run workflow"; the file must be on the
-# default branch for that) or push a branch named test-build/<anything>.
+# Unsigned Windows, macOS and Linux installers for trying sharpR on real
+# devices. Start it from the Actions tab ("Run workflow"; the file must be on
+# the default branch for that) or push a branch named test-build/<anything>.
 # The installers are attached to the run as artifacts; nothing is released.
 
 on:
@@ -43,6 +43,15 @@ jobs:
             bundles: dmg
             artifact: sharpr-macos-intel
             path: src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
+          # Built on the oldest supported base so the glibc requirement stays low.
+          - name: Linux x64
+            platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            bundles: appimage,deb
+            artifact: sharpr-linux-x64
+            path: |
+              src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
+              src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -65,6 +74,12 @@ jobs:
           workspaces: "./src-tauri -> target"
           key: ${{ matrix.target }}
 
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf libgtk-3-dev xdg-utils
+
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
@@ -77,16 +92,9 @@ jobs:
       - name: Fetch FFmpeg sidecar
         run: node scripts/fetch-ffmpeg.mjs ${{ matrix.target }}
 
-      - name: Build installer
-        shell: bash
-        run: |
-          args=(--target "${{ matrix.target }}" --bundles "${{ matrix.bundles }}")
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            # Ad-hoc signature: without any signature, Apple Silicon reports
-            # apps downloaded from the internet as "damaged".
-            args+=(--config '{"bundle":{"macOS":{"signingIdentity":"-"}}}')
-          fi
-          pnpm tauri build "${args[@]}"
+      # macOS builds are ad-hoc signed via src-tauri/tauri.macos.conf.json.
+      - name: Build installers
+        run: pnpm tauri build --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -101,11 +109,18 @@ jobs:
           {
             echo "### ${{ matrix.name }}"
             echo "Download **${{ matrix.artifact }}** under *Artifacts* on this run's summary page and unzip it."
-            if [[ "$RUNNER_OS" == "macOS" ]]; then
-              echo "Open the DMG and drag sharpR to Applications. The build is not notarized: on first launch,"
-              echo "open System Settings → Privacy & Security and click **Open Anyway**,"
-              echo "or run \`xattr -dr com.apple.quarantine /Applications/sharpR.app\`."
-            else
-              echo "Run the setup .exe. It is unsigned: if SmartScreen appears, click **More info → Run anyway**."
-            fi
+            case "$RUNNER_OS" in
+              macOS)
+                echo "Open the DMG and drag sharpR to Applications. The build is not notarized: on first launch,"
+                echo "open System Settings → Privacy & Security and click **Open Anyway**,"
+                echo "or run \`xattr -dr com.apple.quarantine /Applications/sharpR.app\`."
+                ;;
+              Windows)
+                echo "Run the setup .exe. It is unsigned: if SmartScreen appears, click **More info → Run anyway**."
+                ;;
+              *)
+                echo "AppImage: \`chmod +x sharpR_*.AppImage\` and run it (needs FUSE 2: \`libfuse2\` / \`libfuse2t64\`)."
+                echo "Debian/Ubuntu: \`sudo apt install ./sharpR_*_amd64.deb\`."
+                ;;
+            esac
           } >> "$GITHUB_STEP_SUMMARY"

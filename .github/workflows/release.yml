@@ -41,6 +41,18 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      # The release tag is derived from tauri.conf.json > version; a pushed tag
+      # that disagrees would publish installers under the wrong version.
+      - name: Check the tag matches the app version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          APP_VERSION=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          if [ "v$APP_VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match app version $APP_VERSION"
+            exit 1
+          fi
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.rust-targets }}
@@ -48,12 +60,13 @@ jobs:
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: "./src-tauri -> target"
+          key: ${{ matrix.platform }}-${{ matrix.rust-targets }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libgtk-3-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev librsvg2-dev patchelf libgtk-3-dev xdg-utils
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
@@ -83,9 +96,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "sharpR ${{ github.ref_name }}"
-          releaseBody: "See the assets below to download and install this version."
+          # __VERSION__ is replaced with tauri.conf.json > version, so a manual
+          # run (workflow_dispatch) can't create a release named after a branch.
+          tagName: v__VERSION__
+          releaseName: "sharpR v__VERSION__"
+          releaseBody: |
+            Download the installer for your system from the assets below.
+
+            - **Windows:** the `_x64-setup.exe` installer. It is not code-signed yet: if SmartScreen appears, click **More info → Run anyway**.
+            - **macOS:** `_aarch64.dmg` for Apple Silicon, `_x64.dmg` for Intel. Open the DMG and drag sharpR to Applications. The app is not notarized yet: on first launch open **System Settings → Privacy & Security** and click **Open Anyway** (or run `xattr -dr com.apple.quarantine /Applications/sharpR.app`).
+            - **Linux:** the `.AppImage` runs on most distributions (`chmod +x` it first; it needs FUSE 2, `libfuse2` or `libfuse2t64`). On Debian/Ubuntu you can install the `.deb` with `sudo apt install ./sharpR_*_amd64.deb`.
+
+            sharpR bundles FFmpeg (GPL-3.0-or-later), which it runs as a separate program for video compression. See `src-tauri/licenses/THIRD-PARTY-NOTICES.md` for versions and sources.
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
