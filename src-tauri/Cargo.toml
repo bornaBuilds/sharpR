@@ -1,6 +1,6 @@
 [package]
 name = "sharpr"
-version = "0.1.0"
+version = "0.2.0"
 description = "sharpR - local image converter and cropper for the web"
 authors = ["Borna Gadanec"]
 edition = "2021"
